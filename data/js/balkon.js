@@ -204,15 +204,17 @@ function onIrrigationJSON(json)
     for(var i = 0; i < json.ts.length; i++)
     {
         tankLevels.push(json.ts[i]);
-        if (json.ts[i] < 60)
-        {
-            tankBgCols.push(mediumLevelBgCol);
-            tankLCols.push(mediumLevelLCol);
-        } else if (json.ts[i] < 30)
+        if (json.ts[i] < 30)
         {
             tankBgCols.push(lowLevelBgCol);
             tankLCols.push(lowLevelLCol);
-        } else
+        }
+        else if (json.ts[i] < 60)
+        {
+            tankBgCols.push(mediumLevelBgCol);
+            tankLCols.push(mediumLevelLCol);
+        }  
+        else
         {
             tankBgCols.push(goodLevelBgCol);
             tankLCols.push(goodLevelLCol);
@@ -279,7 +281,7 @@ function loadMonthData()
     }
     else if (activeTab == '#luxlevel' && luxMonthChart.data.datasets[0].data.length == 0)
     {
-        $.getJSON('/humMonth.json', function(json){
+        $.getJSON('/luxMonth.json', function(json){
             var data = parseDataJSON(json, false);
             luxMonthChart.data.labels = data.labels;
             luxMonthChart.data.datasets[0].data = data.data;

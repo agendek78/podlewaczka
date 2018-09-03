@@ -1,0 +1,178 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1, shrink-to-fit=no')
+    meta(name='description', content='')
+    meta(name='author', content='')
+    title Balkon
+    // Bootstrap core CSS
+    script(src='https://code.jquery.com/jquery-3.3.1.min.js', crossorigin='anonymous')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js', crossorigin='anonymous')
+    script(src='https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js', crossorigin='anonymous')
+
+    // Custom styles for this template
+    link(rel='stylesheet', href='https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css', crossorigin='anonymous')
+  body
+    .container-fluid
+      .div
+        h1(align="center")#title.shadow.p-3.mb-5.bg-white.rounded Monitorowanie balkonu
+      .div
+        ul#pills-tab.nav.nav-pills.mb-3(role='tablist')
+          li.nav-item
+            a#temperature-tab.nav-link.active(data-toggle='pill', href='#temperature', role='tab', aria-controls='temperature', aria-selected='true')
+              span(data-feather='thermometer')
+              |   Temperatura
+          li.nav-item
+            a#pressure-tab.nav-link(data-toggle='pill', href='#pressure', role='tab', aria-controls='pressure', aria-selected='false')
+              span(data-feather='compass')
+              |   Ciśnienie
+          li.nav-item
+            a#humidity-tab.nav-link(data-toggle='pill', href='#humidity', role='tab', aria-controls='humidity', aria-selected='false')
+              span(data-feather='cloud-drizzle')
+              |   Wilgotność
+          li.nav-item
+            a#humidity-tab.nav-link(data-toggle='pill', href='#luxlevel', role='tab', aria-controls='luxlevel', aria-selected='false')
+              span(data-feather='sun')
+              |   Naświetlenie
+          li.nav-item
+            a#irrigation-tab.nav-link(data-toggle='pill', href='#irrigation', role='tab', aria-controls='irrigation', aria-selected='false')
+              span(data-feather='cloud-rain')
+              |   Podlewanie      
+        #pills-tabContent.tab-content        
+          #temperature.tab-pane.fade.show.active(role='tabpanel', aria-labelledby='temperature-tab')
+            .container-fluid
+              .row
+                h4 Aktualna wartość:&nbsp;
+                h4#current-temp-value ???
+              canvas#dayTempChart.my-4.w-100(width='900', height='380')
+              canvas#monthTempChart.my-4.w-100(width='900', height='380')          
+          #pressure.tab-pane.fade(role='tabpanel', aria-labelledby='pressure-tab') 
+            .container-fluid
+              .row
+                h4 Aktualna wartość:&nbsp;
+                h4#current-pressure-value ???
+              canvas#dayPressChart.my-4.w-100(width='900', height='380')
+              canvas#monthPressChart.my-4.w-100(width='900', height='380')          
+          #humidity.tab-pane.fade(role='tabpanel', aria-labelledby='humidity-tab')
+            .container-fluid
+              .row
+                h4 Aktualna wartość:&nbsp;
+                h4#current-hum-value ???
+              canvas#dayHumChart.my-4.w-100(width='900', height='380')
+              canvas#monthHumChart.my-4.w-100(width='900', height='380')          
+          #luxlevel.tab-pane.fade(role='tabpanel', aria-labelledby='luxlevel-tab')
+            .container-fluid
+              .row
+                h4 Aktualna wartość:&nbsp;
+                h4#current-lux-value ???
+              canvas#dayLuxChart.my-4.w-100(width='900', height='380')
+              canvas#monthLuxChart.my-4.w-100(width='900', height='380')          
+          #irrigation.tab-pane.fade(role='tabpanel', aria-labelledby='irrigation-tab')
+            canvas#tankChart.my-4.w-100(width='900', height='380')
+            h4 Harmonogram podlewania
+            table.table
+              thead.table-info
+                tr
+                  th(scope='col', style='width: 10%') Godzina
+                  th(scope='col', style='width: 10%') Stan
+                  th(scope='col') Włączone?
+              tbody#podlewanie-dane
+                tr#row-1.d-none
+                  td#irrigation-time 1
+                  td
+                    span(data-feather='check-square')#done.align-middle
+                    span(data-feather='x')#waiting.align-middle
+                    span(data-feather='cloud-rain')#ongoing.align-middle
+                  td 
+                    .row
+                      .checkbox
+                        label.form-check-label(for='enCh1')
+                          | &nbsp;o1
+                        input#enCh1.checkbox.style-2.pull-right(type='checkbox')
+                      .checkbox
+                        label.form-check-label(for='enCh2')
+                          | &nbsp;o2
+                        input#enCh2.checkbox.style-2.pull-right(type='checkbox')
+                      .checkbox
+                        label.form-check-label(for='enCh3')
+                          | &nbsp;o3
+                        input#enCh3.checkbox.style-2.pull-right(type='checkbox')
+                tr#row-2.d-none
+                  td#irrigation-time 1
+                  td
+                    span(data-feather='check-square')#done.align-middle
+                    span(data-feather='x')#waiting.align-middle
+                    span(data-feather='cloud-rain')#ongoing.align-middle
+                  td 
+                    .row
+                      .checkbox
+                        label.form-check-label(for='enCh1')
+                          | &nbsp;o1
+                        input#enCh1.checkbox.style-2.pull-right(type='checkbox')
+                      .checkbox
+                        label.form-check-label(for='enCh2')
+                          | &nbsp;o2
+                        input#enCh2.checkbox.style-2.pull-right(type='checkbox')
+                      .checkbox
+                        label.form-check-label(for='enCh3')
+                          | &nbsp;o3
+                        input#enCh3.checkbox.style-2.pull-right(type='checkbox')
+                tr#row-3.d-none
+                  td#irrigation-time 1
+                  td
+                    span(data-feather='check-square')#done.align-middle
+                    span(data-feather='x')#waiting.align-middle
+                    span(data-feather='cloud-rain')#ongoing.align-middle
+                  td 
+                    .row
+                      .checkbox
+                        label.form-check-label(for='enCh1')
+                          | &nbsp;o1
+                        input#enCh1.checkbox.style-2.pull-right(type='checkbox')
+                      .checkbox
+                        label.form-check-label(for='enCh2')
+                          | &nbsp;o2
+                        input#enCh2.checkbox.style-2.pull-right(type='checkbox')
+                      .checkbox
+                        label.form-check-label(for='enCh3')
+                          | &nbsp;o3
+                        input#enCh3.checkbox.style-2.pull-right(type='checkbox')
+                tr#row-4.d-none
+                  td#irrigation-time 1
+                  td
+                    span(data-feather='check-square')#done.align-middle
+                    span(data-feather='x')#waiting.align-middle
+                    span(data-feather='cloud-rain')#ongoing.align-middle
+                  td 
+                    .row
+                      .checkbox
+                        label.form-check-label(for='enCh1')
+                          | &nbsp;o1
+                        input#enCh1.checkbox.style-2.pull-right(type='checkbox')
+                      .checkbox
+                        label.form-check-label(for='enCh2')
+                          | &nbsp;o2
+                        input#enCh2.checkbox.style-2.pull-right(type='checkbox')
+                      .checkbox
+                        label.form-check-label(for='enCh3')
+                          | &nbsp;o3
+                        input#enCh3.checkbox.style-2.pull-right(type='checkbox')
+            button#settings-submit.btn.btn-primary(type='submit') Zapisz ustawienia
+    //
+      Bootstrap core JavaScript
+      ==================================================
+    // Placed at the end of the document so the pages load faster
+    //script.
+    //  window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\\/script>')
+    //script(src='../../assets/js/vendor/popper.min.js')
+    //script(src='../../dist/js/bootstrap.min.js')
+    // Icons
+    script(src='https://unpkg.com/feather-icons/dist/feather.min.js')
+    script.
+      feather.replace()
+    // Graphs
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js')
+    script(src='js/date.format.js')
+    script(src='js/balkon.js')
+    

@@ -79,7 +79,7 @@
 		<link>
 			<name>libraries/EasyDDNS</name>
 			<type>2</type>
-			<location>/home/andy/Arduino/libraries/EasyDDNS</location>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/libraries/EasyDDNS/1.5.0</locationURI>
 		</link>
 		<link>
 			<name>libraries/NTPClient</name>

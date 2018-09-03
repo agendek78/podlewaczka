@@ -1,10 +1,10 @@
 /*
- This sketch sends data via HTTP GET requests to data.sparkfun.com service.
+  This sketch sends data via HTTP GET requests to data.sparkfun.com service.
 
- You need to get streamId and privateKey at data.sparkfun.com and paste them
- below. Or just customize this script to talk to other HTTP servers.
+  You need to get streamId and privateKey at data.sparkfun.com and paste them
+  below. Or just customize this script to talk to other HTTP servers.
 
- */
+*/
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
@@ -54,8 +54,8 @@ static bool wifiReconnect(void)
     Serial.println(ssid);
 
     /* Explicitly set the ESP8266 to be a WiFi-client, otherwise, it by default,
-     would try to act as both a client and an access-point and could cause
-     network-issues with your other WiFi-devices on your WiFi-network. */
+      would try to act as both a client and an access-point and could cause
+      network-issues with your other WiFi-devices on your WiFi-network. */
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
 
@@ -86,8 +86,10 @@ ESP8266WebServer server (33033);
 #define DAILY_MEAS_PERIOD (15 * MINUTE)
 #define DAILY_MEAS_COUNT  (MAKE_TIME(24,0,0) / DAILY_MEAS_PERIOD)
 
-static CMeasData    dayilyMeas(DAILY_MEAS_COUNT, "/dayilyMeas.bin");
-static CMeasData    monthlyMeas(31, "/monthlyMeas.bin");
+static const char	*dailyFileName = "/dayilyMeas.bin";
+static const char	*monthlyFileName = "/monthlyMeas.bin";
+static CMeasData    dayilyMeas(DAILY_MEAS_COUNT, dailyFileName);
+static CMeasData    monthlyMeas(31, monthlyFileName);
 static MeasPoint_t  currMeas;
 
 void formatSPIFFS(void)
@@ -201,11 +203,11 @@ void parseSettings(void)
   uint32_t cc = irr.GetChannelCount();
   uint32_t ec = irr.GetEventCount();
 
-  for(uint32_t i = 0; i < ec; i++)
+  for (uint32_t i = 0; i < ec; i++)
   {
-    for(uint32_t j = 0; j < cc; j++)
+    for (uint32_t j = 0; j < cc; j++)
     {
-      String arg = String("r")+i+String("c")+j;
+      String arg = String("r") + i + String("c") + j;
       if (server.hasArg(arg))
       {
         irr.SetEvChannel(i, j, server.arg(arg) == "0" ? false : true);
@@ -213,6 +215,26 @@ void parseSettings(void)
     }
   }
   server.send(200, "plain/text", "OK");
+}
+
+void sendDailyBinaryData(void)
+{
+  File f = SPIFFS.open(dailyFileName, "r");
+  if (f)
+  {
+    server.streamFile(f, "application/octet-stream");
+    f.close();
+  }
+}
+
+void sendMonthlyBinaryData(void)
+{
+  File f = SPIFFS.open(monthlyFileName, "r");
+  if (f)
+  {
+    server.streamFile(f, "application/octet-stream");
+    f.close();
+  }
 }
 
 void displaySensorDetails(void)
@@ -258,10 +280,10 @@ void setup()
   irr.AddChannel(MOTOR1_PORT, 0);
   irr.AddChannel(MOTOR2_PORT, 1);
 
-  irr.AddTime(MAKE_TIME(8,0,0));
-  irr.AddTime(MAKE_TIME(16,0,0));
-  irr.AddTime(MAKE_TIME(19,30,0));
-  irr.AddTime(MAKE_TIME(22,10,0));
+  irr.AddTime(MAKE_TIME(8, 0, 0));
+  irr.AddTime(MAKE_TIME(15, 30, 0));
+  irr.AddTime(MAKE_TIME(18, 30, 0));
+  irr.AddTime(MAKE_TIME(22, 10, 0));
 
   if (!SPIFFS.begin())
   {
@@ -280,7 +302,10 @@ void setup()
   server.on("/humMonth.json", sendMonthHum);
   server.on("/podlewanie.json", sendIrrStatus);
   server.on("/lux.json", sendDayLux);
+  server.on("/luxMonth.json", sendMonthLux);
   server.on("/sett", parseSettings);
+  server.on(dailyFileName, sendDailyBinaryData);
+  server.on(monthlyFileName, sendMonthlyBinaryData);
   server.serveStatic("/js", SPIFFS, "/js");
   server.serveStatic("/", SPIFFS, "/index.html");
   server.begin();
@@ -367,7 +392,7 @@ void loop()
       currMeas.lux = (uint32_t)event.light;
     }
 
-    Serial.print("Lux: ");Serial.println(event.light);
+    Serial.print("Lux: "); Serial.println(event.light);
     Serial.print("Time: ");
     Serial.println(timeClient.getFormattedTime());
 
