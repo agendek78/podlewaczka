@@ -17,13 +17,15 @@ typedef enum
   MeasType_TEMP,
   MeasType_PRESS,
   MeasType_HUM,
-  MeasType_LUX
+  MeasType_LUX,
+  MeasType_BATT
 } MeasType_t;
 
 typedef struct __attribute__((packed))
 {
   uint32_t ts;
   int16_t  temp;
+  int16_t  vbatt;
   uint16_t press;
   uint32_t lux;
   uint8_t  hum;

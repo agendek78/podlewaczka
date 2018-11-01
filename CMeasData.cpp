@@ -63,6 +63,9 @@ void CMeasData::GetMeasJSON(MeasType_t t, String& json)
       case MeasType_LUX:
         json += (*it).lux;
         break;
+      case MeasType_BATT:
+        json += (*it).vbatt;
+        break;
     }
   }
 

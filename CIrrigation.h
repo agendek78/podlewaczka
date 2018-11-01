@@ -70,6 +70,8 @@ public:
   void DoWork(uint32_t i_currTime);
 
   void GetStatusJSON(String& json);
+  void ControlChannel(bool i_en, uint32_t i_ch);
+
 };
 
 #endif /* CIRRIGATION_H_ */

@@ -87,7 +87,7 @@ void CIrrigation::AddChannel(uint8_t i_out, uint8_t i_tank)
 {
   IrrChannel_t ch = {i_out, i_tank, IrrState_WAITING};
   irrChannels.push_back(ch);
-  digitalWrite(i_out, HIGH);
+  digitalWrite(i_out, LOW);
 }
 
 void CIrrigation::AddTime(uint32_t t)
@@ -103,14 +103,14 @@ void CIrrigation::AddTime(uint32_t t)
 
 void CIrrigation::startCh(uint8_t chIdx)
 {
-  digitalWrite(irrChannels[chIdx].output, LOW);
+  digitalWrite(irrChannels[chIdx].output, HIGH);
   irrChannels[chIdx].state = IrrState_ONGOING;
   Serial.print("Rozpoczęcie podlewania na kanale ");Serial.println(chIdx);
 }
 
 void CIrrigation::stopCh(uint8_t chIdx)
 {
-  digitalWrite(irrChannels[chIdx].output, HIGH);
+  digitalWrite(irrChannels[chIdx].output, LOW);
   irrChannels[chIdx].state = IrrState_WAITING;
   Serial.print("Zakończenie podlewania na kanale ");Serial.println(chIdx);
 }
@@ -215,5 +215,20 @@ void CIrrigation::DoWork(uint32_t i_currTime)
   else
   {
     irrigate(i_currTime);
+  }
+}
+
+void CIrrigation::ControlChannel(bool i_en, uint32_t i_ch)
+{
+  if (i_ch < irrChannels.size())
+  {
+    if (i_en == true)
+    {
+      startCh(i_ch);
+    }
+    else
+    {
+      stopCh(i_ch);
+    }
   }
 }

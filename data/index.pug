@@ -39,6 +39,10 @@ html(lang='en')
             a#irrigation-tab.nav-link(data-toggle='pill', href='#irrigation', role='tab', aria-controls='irrigation', aria-selected='false')
               span(data-feather='cloud-rain')
               |   Podlewanie      
+          li.nav-item
+            a#irrigation-tab.nav-link(data-toggle='pill', href='#battlevel', role='tab', aria-controls='battlevel', aria-selected='false')
+              span(data-feather='battery')
+              |   Bateria              
         #pills-tabContent.tab-content        
           #temperature.tab-pane.fade.show.active(role='tabpanel', aria-labelledby='temperature-tab')
             .container-fluid
@@ -159,6 +163,11 @@ html(lang='en')
                           | &nbsp;o3
                         input#enCh3.checkbox.style-2.pull-right(type='checkbox')
             button#settings-submit.btn.btn-primary(type='submit') Zapisz ustawienia
+          #battlevel.tab-pane.fade(role='tabpanel', aria-labelledby='battlevel-tab')
+            .container-fluid
+              canvas#battLevelChart.my-4.w-100(width='900', height='380')
+          
+            
     //
       Bootstrap core JavaScript
       ==================================================

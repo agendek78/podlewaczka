@@ -14,19 +14,23 @@
 #include <EasyDDNS.h>
 
 #include <Adafruit_AM2320.h>
-#include <Adafruit_BMP280.h>
 #include <Adafruit_TSL2561_U.h>
+#include <Adafruit_BMP280.h>
+#include "libraries/i2c/esp8266_twi.h"
 
 #include "CMeasData.h"
 #include "CIrrigation.h"
+#include "CBattMon.h"
 
 #define CURR_TIME()   (timeClient.getEpochTime() % DAY)
-#define MOTOR1_PORT   D2
-#define MOTOR2_PORT   D8
+#define MOTOR1_PORT   D11
+#define MOTOR2_PORT   D12
+#define VBATT_PIN     A0
 #define TANK_COUNT    (3)
 
 CIrrigation     irr(TANK_COUNT);
-Adafruit_AM2320 am2320 = Adafruit_AM2320();
+CBattMon        batt(VBATT_PIN, 10);
+Adafruit_AM2320 am2320;
 Adafruit_BMP280 bmp;
 Adafruit_TSL2561_Unified tsl = Adafruit_TSL2561_Unified(TSL2561_ADDR_FLOAT);
 
@@ -37,8 +41,7 @@ WiFiUDP ntpUDP;
 
 // By default 'pool.ntp.org' is used with 60 seconds update interval and
 // no offset
-NTPClient timeClient(ntpUDP, "tempus1.gum.gov.pl", 2 * 60 * 60);
-
+NTPClient timeClient(ntpUDP, "tempus1.gum.gov.pl", 1 * 60 * 60);
 
 static bool wifiReconnect(void)
 {
@@ -86,8 +89,8 @@ ESP8266WebServer server (33033);
 #define DAILY_MEAS_PERIOD (15 * MINUTE)
 #define DAILY_MEAS_COUNT  (MAKE_TIME(24,0,0) / DAILY_MEAS_PERIOD)
 
-static const char	*dailyFileName = "/dayilyMeas.bin";
-static const char	*monthlyFileName = "/monthlyMeas.bin";
+static const char	  *dailyFileName = "/dayilyMeas.bin";
+static const char	  *monthlyFileName = "/monthlyMeas.bin";
 static CMeasData    dayilyMeas(DAILY_MEAS_COUNT, dailyFileName);
 static CMeasData    monthlyMeas(31, monthlyFileName);
 static MeasPoint_t  currMeas;
@@ -198,6 +201,15 @@ void sendIrrStatus(void)
   server.send(200, "application/json", json);
 }
 
+void sendBattLevel(void)
+{
+  String json;
+
+  dayilyMeas.GetMeasJSON(MeasType_BATT, json);
+  addCurrMeasJSON(currMeas.vbatt, json);
+  server.send(200, "application/json", json);
+}
+
 void parseSettings(void)
 {
   uint32_t cc = irr.GetChannelCount();
@@ -215,6 +227,31 @@ void parseSettings(void)
     }
   }
   server.send(200, "plain/text", "OK");
+}
+
+void parseMotorCtrl(void)
+{
+  const static char *motorStateArg = "state";
+  const static char *motorChannelArg = "ch";
+
+  if (server.hasArg(motorStateArg) && server.hasArg(motorChannelArg))
+  {
+    String val = server.arg(motorStateArg);
+
+    if (val[0] == '1')
+    {
+      irr.ControlChannel(true, server.arg(motorChannelArg).toInt());
+    }
+    else if (val[0] == '0')
+    {
+      irr.ControlChannel(false, server.arg(motorChannelArg).toInt());
+    }
+    server.send(200, "plain/text", "OK");
+  }
+  else
+  {
+    server.send(404, "plain/text", "Parameters error!");
+  }
 }
 
 void sendDailyBinaryData(void)
@@ -262,6 +299,8 @@ void setup()
   Serial.begin(115200);
   delay(10);
 
+  twi_init(2, 14);
+
   memset(&currMeas, 0, sizeof(currMeas));
 
   wifiReconnect();
@@ -274,13 +313,14 @@ void setup()
 
   pinMode(MOTOR1_PORT, OUTPUT);
   pinMode(MOTOR2_PORT, OUTPUT);
+
   am2320.begin();
   bmp.begin(0x76);
 
   irr.AddChannel(MOTOR1_PORT, 0);
   irr.AddChannel(MOTOR2_PORT, 1);
 
-  irr.AddTime(MAKE_TIME(8, 0, 0));
+  irr.AddTime(MAKE_TIME(8, 30, 0));
   irr.AddTime(MAKE_TIME(15, 30, 0));
   irr.AddTime(MAKE_TIME(18, 30, 0));
   irr.AddTime(MAKE_TIME(22, 10, 0));
@@ -303,7 +343,9 @@ void setup()
   server.on("/podlewanie.json", sendIrrStatus);
   server.on("/lux.json", sendDayLux);
   server.on("/luxMonth.json", sendMonthLux);
+  server.on("/batt.json", sendBattLevel);
   server.on("/sett", parseSettings);
+  server.on("/motor", parseMotorCtrl);
   server.on(dailyFileName, sendDailyBinaryData);
   server.on(monthlyFileName, sendMonthlyBinaryData);
   server.serveStatic("/js", SPIFFS, "/js");
@@ -311,7 +353,7 @@ void setup()
   server.begin();
 
   EasyDDNS.service("noip");
-  EasyDDNS.client("host", "login", "pw");
+  //EasyDDNS.client("host", "login", "pw");
 
   if (tsl.begin())
   {
@@ -323,6 +365,8 @@ void setup()
   {
     Serial.println("TSL2561 not detected!");
   }
+
+  WiFi.setSleepMode(WIFI_MODEM_SLEEP);
 }
 
 #define CHECK_TIME  (10UL * MEAS_PERIOD)
@@ -396,6 +440,11 @@ void loop()
     Serial.print("Time: ");
     Serial.println(timeClient.getFormattedTime());
 
+    batt.DoMeas();
+    currMeas.vbatt = batt.GetMeanValue();
+    Serial.print("Batt: "); Serial.print(currMeas.vbatt); Serial.print(", per: ");
+    Serial.println(batt.GetBattLevel(currMeas.vbatt));
+
     currMeas.ts = currTime;
 
     if (nextDayilyStoreMeas <= nextMeasTime &&
@@ -432,4 +481,7 @@ void loop()
     nextDayilyStoreMeas = currTime;
     Serial.println("Invalid meas time! Updating to current!");
   }
+
+  //Serial.println("entering sleep");
+  delay(500);
 }

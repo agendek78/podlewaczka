@@ -85,6 +85,7 @@ var humDayChart = createChart(document.getElementById("dayHumChart"), "Wilgotno�
 var humMonthChart = createChart(document.getElementById("monthHumChart"), "Wilgotność w miesiącu");
 var luxDayChart = createChart(document.getElementById("dayLuxChart"), "Naświetlenie dziś");
 var luxMonthChart = createChart(document.getElementById("monthLuxChart"), "Naświetlenie w miesiącu");
+var battLevelChart = createChart(document.getElementById("battLevelChart"), "Wykorzystanie baterii");
 
 var activeTab = '#temperature';
 var lastMonthPressTime = new Date(0);
@@ -148,6 +149,12 @@ function onDayMeasJSON(json)
         luxDayChart.data.datasets[0].data = data.data;
         luxDayChart.update();
     }
+    else if (activeTab == '#battlevel')
+    {
+    	battLevelChart.data.labels = data.labels;
+    	battLevelChart.data.datasets[0].data = data.data;
+    	battLevelChart.update();
+    }    
 }
 
 var goodLevelBgCol ='rgba(75, 192, 100, 0.4)';
@@ -248,6 +255,10 @@ function updateGraph(){
     {
         $.getJSON('/podlewanie.json', onIrrigationJSON);
     }
+    else if (activeTab == '#battlevel')
+    {
+        $.getJSON('/batt.json', onDayMeasJSON);
+    }    
 }
 
 function loadMonthData()
